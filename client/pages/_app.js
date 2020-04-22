@@ -1,5 +1,6 @@
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '../components/base.css';
 import App from 'next/app'
 import Layout from '../components/Layout'
 
