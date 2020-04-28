@@ -12,10 +12,13 @@ class VocabularyOverview extends React.Component {
     }
 
     async componentDidMount() {
+        // If CORS error appears, add @CrossOrigin("*") on top of vocabulary controller class in backend to circumvent.
+        // Opens up a security risk tho, so only use for testing purposes.
         const data = await fetch('http://localhost:8080/api/vocabulary')
         const json = await data.json()
+        console.log("Refetched the table data")
         
-        var json = JSON.parse(text)
+        //var json = JSON.parse(text)
         this.setState({vocabulary: json})
     }
 
