@@ -1,6 +1,7 @@
 package at.tugraz.asd.LANG.Controller;
 
 
+import at.tugraz.asd.LANG.Exeptions.CreateVocabularyFail;
 import at.tugraz.asd.LANG.Exeptions.EditFail;
 import at.tugraz.asd.LANG.Languages;
 import at.tugraz.asd.LANG.Messages.in.CreateVocabularyMessageIn;
@@ -37,8 +38,12 @@ public class VocabularyController {
 
     @PostMapping
     public ResponseEntity addVocabulary(@RequestBody CreateVocabularyMessageIn msg){
-        service.saveVocabulary(msg);
-        return ResponseEntity.ok(null);
+        try{
+            service.saveVocabulary(msg);
+            return ResponseEntity.ok(null);
+        }catch (CreateVocabularyFail e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping (path = "/topics")
@@ -80,6 +85,29 @@ public class VocabularyController {
         catch (EditFail e){
             return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @GetMapping (path = "rating/{aORz}")
+    @ResponseBody
+    public ResponseEntity getSortedRating(@PathVariable("aORz")String aOrz){
+        ArrayList<VocabularyOut> ret = new ArrayList<>();
+        List<VocabularyModel> vocab = service.sortRating(aOrz);
+        if(vocab.isEmpty())
+            return ResponseEntity.noContent().build();
+
+        vocab.forEach(el->{
+            HashMap<Languages, String> translation = new HashMap<>();
+            el.getTranslationVocabMapping().forEach(translationModel -> {
+                translation.put(translationModel.getLanguage(), translationModel.getVocabulary());
+            });
+            ret.add(new VocabularyOut(
+                    el.getTopic(),
+                    el.getVocabulary(),
+                    translation,
+                    el.getRating()
+            ));
+        });
+        return ResponseEntity.ok(ret);
     }
 
     @GetMapping (path = "alphabetically/{aORz}")
@@ -198,8 +226,7 @@ public class VocabularyController {
     public ResponseEntity exportBackup(){
         try{
             File backup = service.exportVocabulary();
-
-            Path path = Paths.get(backup.getAbsolutePath());
+            Path path = Paths.get(backup.getPath());
             ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
 
             return ResponseEntity.ok()
@@ -215,10 +242,12 @@ public class VocabularyController {
 
     @PostMapping (path = "Import")
     public ResponseEntity importBackup(@RequestParam("file") MultipartFile Backup_File){
-        System.out.println("Successfull");
         try{
-            service.importVocabulary(Backup_File);
-            return ResponseEntity.ok(null);
+            String content = new String(Backup_File.getBytes());
+            Boolean success = service.importVocabulary(content);
+
+            return ResponseEntity.ok()
+                    .body(success);
         }
         catch (Exception e){
             System.out.println("Error Importing File " + e);
