@@ -1,10 +1,21 @@
 import fetch from 'isomorphic-unfetch';
-import {Container} from "next/app";
 import Link from 'next/link'
 import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Rating from 'react-rating';
 import { Form, FormControl } from 'react-bootstrap';
+
+import counterpart from 'counterpart'
+import Translate from 'react-translate-component'
+import en from './languages/en'
+import de from './languages/de'
+import fr from './languages/fr'
+
+counterpart.registerTranslations('en', en);
+counterpart.registerTranslations('de', de);
+counterpart.registerTranslations('fr', fr);
+counterpart.setLocale('en');
+
 
 
 class VocabularyOverview extends React.Component {
@@ -12,8 +23,13 @@ class VocabularyOverview extends React.Component {
         super();
         this.handleChange_Topic = this.handleChange_Topic.bind(this);
         this.state = {
-            vocabulary: []
+            vocabulary: [],
+            language: 'en'
         };
+    }
+    onLangChange = (e) => {
+      this.setState({language: e.target.value});
+      counterpart.setLocale(e.target.value);
     }
 
     async componentDidMount(args = "b") {
@@ -68,44 +84,46 @@ class VocabularyOverview extends React.Component {
     render() {
         return (
                 <main>
-                    <h1 className="title">
-                        Vocabulary Overview
-                    </h1>
-                    <p className="description">
-                        View and Edit your Vocabulary
-                    </p>
+                  <select value={this.state.language} onChange={this.onLangChange}>
+                    <option value="en" >EN</option>
+                    <option value="de" >DE</option>
+                    <option value="fr" >FR</option>
+                  </select>
 
-                    <div style={{ width: "100%", padding: "0.75rem", marginLeft: "2rem" }}>
+                  <Translate content="title2" component="h1"></Translate>
+                  <Translate content="title2_discription" component="p"></Translate>
+
+                    <div>
+                    <div style={{ width: "100%", padding: "0.75rem"}}>
                         <Link href="/add_vocabulary">
                             <Button variant="outline-primary">+</Button>
                         </Link>
                     </div>
 
-                    <Container>
                         <table className="table">
                             <thead>
                             <tr>
-                                <th scope="col">Vocabulary
-                                    <button type="submit" onClick={() => {this.componentDidMount("a")}} class="btn btn-outline-dark filter_buttons"  >▲</button>
-                                    <button type="submit" onClick={() => {this.componentDidMount("z")}} class="btn btn-outline-dark filter_buttons" >▼</button>
+                                <th scope="col"> <Translate content="vocabulary" ></Translate>
+                                    <button type="submit" onClick={() => {this.componentDidMount("a")}} className="btn btn-outline-dark filter_buttons" style={{marginLeft: "0.5rem"}} >▲</button>
+                                    <button type="submit" onClick={() => {this.componentDidMount("z")}} className="btn btn-outline-dark filter_buttons" >▼</button>
                                 </th>
                                 <th scope="col">
                                     <Form.Group style={{ width: 220 }} controlId="select_language" onChange={this.handleChange_Topic}>
                                         <select id="selectbox" variant="primary"  name="translation_language">
-                                            <option value="Default">All Topics</option>
-                                            <option value="USER_GENERATED">USER_GENERATED</option>
-                                            <option value="Sport">Sport</option>
-                                            <option value="Home">Home</option>
-                                            <option value="Food">Food</option>
-                                            <option value="Human">Human</option>
-                                            <option value="Electronic">Electronic</option>
+                                            <option value="Default" > <Translate content="all_topics" ></Translate> </option>
+                                            <option value="USER_GENERATED"> <Translate content="topic_user_generated" ></Translate></option>
+                                            <option value="Sport"> <Translate content="topic_sport" ></Translate> </option>
+                                            <option value="Home"> <Translate content="topic_home" ></Translate> </option>
+                                            <option value="Food"> <Translate content="topic_food" ></Translate> </option>
+                                            <option value="Human"> <Translate content="topic_human" ></Translate> </option>
+                                            <option value="Electronic"> <Translate content="topic_electronic" ></Translate> </option>
                                         </select>
                                     </Form.Group>
                                 </th>
-                                <th scope="col">Translations</th>
-                                <th scope="col">Rating
-                                    <button type="submit" onClick={() => {this.componentDidMount("c")}} class="btn btn-outline-dark filter_buttons"  >▲</button>
-                                    <button type="submit" onClick={() => {this.componentDidMount("d")}} class="btn btn-outline-dark filter_buttons" >▼</button>
+                                <th scope="col"><Translate content="translation" ></Translate></th>
+                                <th scope="col"><Translate content="rating" ></Translate>
+                                    <button type="submit" onClick={() => {this.componentDidMount("c")}} className="btn btn-outline-dark filter_buttons"  >▲</button>
+                                    <button type="submit" onClick={() => {this.componentDidMount("d")}} className="btn btn-outline-dark filter_buttons" >▼</button>
                                 </th>
                                 <th className="test_col" scope="col"></th>
                             </tr>
@@ -132,7 +150,7 @@ class VocabularyOverview extends React.Component {
                                                     en: element.translations.EN, 
                                                     fr: element.translations.FR,
                                                     rating: element.rating}}}>
-                                                    <Button variant="outline-primary">Edit</Button>
+                                                    <Button variant="outline-primary"><Translate content="edit"></Translate></Button>
                                                 </Link>
                                             </td>
                                         </tr>
@@ -141,7 +159,7 @@ class VocabularyOverview extends React.Component {
                             }
                             </tbody>
                         </table>
-                    </Container>
+                    </div>
 
                 </main>
         );
